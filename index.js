@@ -11,11 +11,12 @@ var mergeTrees = require('broccoli-merge-trees');
 const { Funnel } = require('broccoli-funnel');
 const { BuildWorkers } = require('./broccoli-plugins/build-workers');
 
-
 module.exports = {
   name: require('./package').name,
 
   included(app) {
+    this._super.included.apply(this, arguments);
+
     this.appRoot = path.join(app.project.root);
     this.workersDir = path.join(this.appRoot, 'workers');
   },
@@ -23,19 +24,17 @@ module.exports = {
   treeForPublic() {
     let trees = [];
 
-    // if (type == 'all') {
-      if (fs.existsSync(this.workersDir)) {
-        // 1. Watch workers dir
-        let workerTree = new WatchedDir(this.workersDir);
+    if (fs.existsSync(this.workersDir)) {
+      // 1. Watch workers dir
+      let workerTree = new WatchedDir(this.workersDir);
 
-        // 2. Do something witht his tree > name/index.ts to name.js
-        workerTree = new BuildWorkers([workerTree])
+      // 2. Do something witht his tree > name/index.ts to name.js
+      workerTree = new BuildWorkers([workerTree]);
 
-        // 3. Make it output to dist/workers
-        workerTree = new Funnel(workerTree, { destDir: 'workers' })
-        trees.push(workerTree)
-      }
-    // }
+      // 3. Make it output to dist/workers
+      workerTree = new Funnel(workerTree, { destDir: 'workers' });
+      trees.push(workerTree);
+    }
 
     return mergeTrees(trees, { overwrite: true });
   },
