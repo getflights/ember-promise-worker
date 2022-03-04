@@ -3,7 +3,7 @@ import Service from '@ember/service';
 
 import { PWBHost } from 'promise-worker-bi';
 
-export const WORKERS_PATH = '/workers/';
+export const WORKERS_PATH = '/workers/'; // --> dist/workers
 
 type WorkerRegistry = { [path: string]: PWBHost };
 
@@ -12,10 +12,14 @@ export default class WorkersService extends Service {
 
   @action
   getWorker(name: string): PWBHost {
+    // 1. Try to find this worker or throw an error
     const path = WORKERS_PATH + name;
+    // --> If it already exists, return the instance
+    if (this.registry[path]) {
+      return this.registry[path];
+    }
 
-    if (this.registry[path]) return this.registry[path];
-
+    // --> If it doesn't, try to create one
     // @ts-ignore
     const hash = window.ASSET_FINGERPRINT_HASH
 
@@ -26,8 +30,10 @@ export default class WorkersService extends Service {
       throw new Error('Failed to create promiseWorker?');
     }
 
+    // 2. Register the worker
     this.registry[path] = promiseWorker;
 
+    // 3. Return the worker
     return this.registry[path];
   }
 
