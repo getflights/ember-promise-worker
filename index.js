@@ -6,32 +6,56 @@ const fs = require('fs');
 
 const esbuild = require('esbuild');
 
-var Funnel = require('broccoli-funnel');
+const { WatchedDir } = require('broccoli-source');
 var mergeTrees = require('broccoli-merge-trees');
+const { Funnel } = require('broccoli-funnel');
+const { BuildWorkers } = require('./broccoli-plugins/build-workers');
+
 
 module.exports = {
   name: require('./package').name,
 
   included(app) {
     this.appRoot = path.join(app.project.root);
-    this.workerRoot = path.join(this.appRoot, 'app', 'workers')
+    this.workersDir = path.join(this.appRoot, 'workers');
   },
 
   treeForPublic() {
-    const workers = this._detectWorkers();
+    let trees = [];
 
-    const buildDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ember-promise-worker-'));
+    // if (type == 'all') {
+      if (fs.existsSync(this.workersDir)) {
+        // 1. Watch workers dir
+        let workerTree = new WatchedDir(this.workersDir);
 
-    let options = {
+        // 2. Do something witht his tree > name/index.ts to name.js
+        workerTree = new BuildWorkers([workerTree])
+
+        // 3. Make it output to dist/workers
+        workerTree = new Funnel(workerTree, { destDir: 'workers' })
+        trees.push(workerTree)
+      }
+    // }
+
+    return mergeTrees(trees, { overwrite: true });
+  },
+
+  _buildWorkers() {
+    // 1. detect workers
+    let workers = {};
+    let dir = fs.readdirSync(this.workersDir);
+    dir.forEach((name) => {
+      workers[name] = path.join(this.workersDir, name, 'index.ts'); // Also .js in the future?
+    });
+
+    // 2. setup builder
+    const workerBuilder = this._configureWorkerBuilder({
       isProduction: true,
-      buildDir,
-    };
+      buildDir: this.workerTempDir,
+    });
 
-    let workerBuilder = this._configureWorkerBuilder(options);
-
+    // 3. build workers
     Object.entries(workers).map(workerBuilder);
-
-    return new Funnel(buildDir, { destDir: 'workers' })
   },
 
   _configureWorkerBuilder({ isProduction, buildDir }) {
@@ -48,17 +72,4 @@ module.exports = {
       });
     };
   },
-
-  _detectWorkers() {
-    let workers = {};
-    let dir = fs.readdirSync(this.workerRoot);
-
-    for (let i = 0; i < dir.length; i++) {
-      let name = dir[i];
-
-      workers[name] = path.join(this.workerRoot, name, 'index.ts');
-    }
-
-    return workers;
-  }
 };
