@@ -1,7 +1,7 @@
 ember-promise-worker
 ==============================================================================
 
-[Short description of the addon.]
+An addon to work with promise-worker-bi in Ember
 
 
 Compatibility
@@ -23,8 +23,11 @@ ember install ember-promise-worker
 Usage
 ------------------------------------------------------------------------------
 
-[Longer description of how to use the addon in apps.]
+With ember-promise-worker, you can use web workers in your Ember project.
 
+Develop your worker in ```/app/workers/{name}/index.ts``` and talk to them in the WorkersService using getWorker('name') and postMessage().
+
+Also check out promise-worker-bi for more information about the workers properties, methods: https://www.npmjs.com/package/promise-worker-bi
 
 Contributing
 ------------------------------------------------------------------------------
