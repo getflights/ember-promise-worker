@@ -5,7 +5,8 @@
   "keywords": [
     "ember-addon"
   ],
-  "repository": "",
+  "repository": "https://github.com/BoussonKarel/ember-promise-worker",
+  "homepage": "https://github.com/BoussonKarel/ember-promise-worker",
   "license": "MIT",
   "author": "",
   "directories": {
