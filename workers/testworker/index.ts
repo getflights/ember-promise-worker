@@ -1,7 +1,3 @@
-import { PWBWorker } from 'promise-worker-bi';
-
-let promiseWorker = new PWBWorker();
-
-promiseWorker.register(function (message: any) {
-  return message;
-});
+addEventListener('message', (event) => {
+  event.ports[0].postMessage(event.data)
+})

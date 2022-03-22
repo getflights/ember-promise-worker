@@ -1,15 +1,27 @@
 import Service from '@ember/service';
 
-import { PWBHost } from 'promise-worker-bi';
-
 export const WORKERS_PATH = '/workers/'; // --> dist/workers
 
-type WorkerRegistry = { [path: string]: PWBHost };
+type WorkerRegistry = { [path: string]: Worker };
 
 export default class WorkersService extends Service {
   registry: WorkerRegistry = {};
 
-  async getWorker(name: string): Promise<PWBHost> {
+  workerMessage(workerName: string, message: any) {
+    return new Promise(async (resolve) => {
+      const worker: Worker = await this.getWorker(workerName)
+
+      const messageChannel = new MessageChannel()
+
+      messageChannel.port1.onmessage = (e) => {
+        resolve(e.data);
+      }
+
+      worker.postMessage(message, [messageChannel.port2])
+    })
+  }
+
+  async getWorker(name: string): Promise<Worker> {
     const path = WORKERS_PATH + name;
 
     // --> If this worker already exists, return the instance
@@ -29,31 +41,25 @@ export default class WorkersService extends Service {
 
     const worker = new Worker(workerPath);
 
-    const promiseWorker = new PWBHost(worker);
-
-    if (!promiseWorker) {
-      throw new Error('Failed to create promiseWorker');
-    }
-
     // 2. Register the worker
-    this.registry[path] = promiseWorker;
+    this.registry[path] = worker;
 
     // 3. Return the worker
     return this.registry[path];
   }
 
-  terminateWorker(worker: PWBHost) {
-    (worker._worker as Worker).terminate();
-  }
+  // terminateWorker(worker: Worker) {
+  //   worker.terminate();
+  // }
 
   terminateWorkerByName(name: string) {
     const path = WORKERS_PATH + name;
-    this.terminateWorker(this.registry[path]);
+    this.registry[path].terminate();
   }
 
   willDestroy() {
-    Object.values(this.registry).forEach((promiseWorker) => {
-      (promiseWorker._worker as Worker).terminate();
+    Object.values(this.registry).forEach((worker) => {
+      worker.terminate();
     });
   }
 }
