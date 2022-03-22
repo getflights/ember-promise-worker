@@ -7,22 +7,30 @@ type WorkerRegistry = { [path: string]: Worker };
 export default class WorkersService extends Service {
   registry: WorkerRegistry = {};
 
-  workerMessage(workerName: string, message: any) {
-    return new Promise(async (resolve) => {
+  workerMessage(workerName: string, message: Object) {
+    return new Promise(async (resolve, reject) => {
       const worker: Worker = await this.getWorker(workerName)
 
-      // We don't really need MessageChannel
-      // const messageChannel = new MessageChannel()
-
-      // messageChannel.port1.onmessage = (e) => {
-      //   resolve(e.data);
-      // }
-
-      worker.onmessage = ((e) => {
+      // Worker has responded > resolve
+      const messageFromWorker = (e: MessageEvent) => {
         resolve(e.data)
-      })
+        // Stop listening to the worker, it has been resolved
+        worker.removeEventListener('message', messageFromWorker)
+      }
 
-      worker.postMessage(message, /* [messageChannel.port2] */)
+      worker.addEventListener('message', messageFromWorker)
+
+      // How to avoid getting no response and thus freezing the application
+
+      // Don't freeze on worker errors
+      const errorFromWorker = (e: ErrorEvent) => {
+        e.preventDefault()
+        reject(e)
+      }
+
+      worker.addEventListener('error', errorFromWorker)
+
+      worker.postMessage(message) // We don't need MessageChannel (for now?)
     })
   }
 
@@ -40,11 +48,9 @@ export default class WorkersService extends Service {
     const workerPath = `${path}${hash || ''}.js`
 
     // TODO: Error or something on 404
-    await fetch(workerPath).then(r => {
-      if (!r.ok) throw new Error('Worker could not be found')
-    }).catch((e) => {throw e})
-
     const worker = new Worker(workerPath);
+
+    console.log(name, worker)
 
     // 2. Register the worker
     this.registry[path] = worker;

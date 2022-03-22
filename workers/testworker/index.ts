@@ -1,3 +1,5 @@
+// Alternative: self.onmessage
 addEventListener('message', (event) => {
-  postMessage(event.data)
+  // throw new Error('yeeee')
+  postMessage(event.data);
 })

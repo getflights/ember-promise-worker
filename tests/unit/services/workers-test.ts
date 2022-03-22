@@ -29,6 +29,14 @@ module('Unit | Service | workers', function(hooks) {
     })
 
     assert.ok(hasErrors, 'getWorker throws an error')
+
+    let hasMessageErrors = workers.workerMessage('zkHlELpdsqRsAXAL6u9q', 'this shouldnt work').then(() => {
+      return false
+    }).catch(() => {
+      return true
+    })
+
+    assert.ok(hasMessageErrors, 'workerMessage throws an error')
   })
 });
 
