@@ -24,7 +24,7 @@ module('Unit | Service | workers', function(hooks) {
 
     let hasErrors = await workers.getWorker('zkHlELpdsqRsAXAL6u9q').then(() => {
       return false
-    }).catch((e) => {
+    }).catch(() => {
       return true
     })
 
