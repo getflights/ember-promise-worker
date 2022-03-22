@@ -11,13 +11,18 @@ export default class WorkersService extends Service {
     return new Promise(async (resolve) => {
       const worker: Worker = await this.getWorker(workerName)
 
-      const messageChannel = new MessageChannel()
+      // We don't really need MessageChannel
+      // const messageChannel = new MessageChannel()
 
-      messageChannel.port1.onmessage = (e) => {
-        resolve(e.data);
-      }
+      // messageChannel.port1.onmessage = (e) => {
+      //   resolve(e.data);
+      // }
 
-      worker.postMessage(message, [messageChannel.port2])
+      worker.onmessage = ((e) => {
+        resolve(e.data)
+      })
+
+      worker.postMessage(message, /* [messageChannel.port2] */)
     })
   }
 
