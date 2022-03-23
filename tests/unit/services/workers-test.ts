@@ -9,7 +9,7 @@ module('Unit | Service | workers', function(hooks) {
     let workers: WorkersService = this.owner.lookup('service:workers') as WorkersService;
 
     // Testworker exists in this addon
-    let testworker = await workers.getWorker('testworker')
+    let testworker = await workers._getWorker('testworker')
     assert.ok(testworker, 'testworker exists')
 
     // Worker just returns his messages
@@ -22,15 +22,15 @@ module('Unit | Service | workers', function(hooks) {
     let workers: WorkersService = this.owner.lookup('service:workers') as WorkersService;
     assert.ok(workers, 'workers service was found')
 
-    let hasErrors = await workers.getWorker('zkHlELpdsqRsAXAL6u9q').then(() => {
+    let hasInitErrors = await workers._getWorker('zkHlELpdsqRsAXAL6u9q').then(() => {
       return false
     }).catch(() => {
       return true
     })
 
-    assert.ok(hasErrors, 'getWorker throws an error')
+    assert.ok(hasInitErrors, 'getWorker throws an error')
 
-    let hasMessageErrors = workers.workerMessage('zkHlELpdsqRsAXAL6u9q', 'this shouldnt work').then(() => {
+    let hasMessageErrors = await workers.workerMessage('zkHlELpdsqRsAXAL6u9q', 'this shouldnt work').then(() => {
       return false
     }).catch(() => {
       return true

@@ -1,5 +1,7 @@
-// Alternative: self.onmessage
-addEventListener('message', (event) => {
-  // throw new Error('yeeee')
-  postMessage(event.data);
+import EPWorker from '../../app/objects/EPWorker'
+
+const worker = new EPWorker()
+
+worker.register((message) => {
+  return message;
 })
