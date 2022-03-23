@@ -14,8 +14,8 @@ class BuildWorkers extends Plugin {
 
   build() {
     this.inputPaths.forEach((inputPath) => {
-      this._buildWorkers(inputPath)
-    })
+      this._buildWorkers(inputPath);
+    });
   }
 
   _buildWorkers(inputPath) {
