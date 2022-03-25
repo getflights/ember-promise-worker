@@ -1,10 +1,10 @@
-export type MessageCallback = (msg: MessageEvent) => any;
+export type MessageCallback = (msg: any) => Promise<any>;
 
 export default class EPWorker {
   _messageCallback: MessageCallback;
 
   constructor() {
-    this._messageCallback = () => {};
+    this._messageCallback = async () => {};
 
     this._onMessage = this._onMessage.bind(this)
     addEventListener('message', this._onMessage)
@@ -13,10 +13,10 @@ export default class EPWorker {
     this._postMessage({registered: true})
   }
 
-  _onMessage(e: MessageEvent) {
+  async _onMessage(e: MessageEvent) {
     const message = e.data;
 
-    const result = this._messageCallback(message)
+    const result = await this._messageCallback(message)
     this._postMessage(result)
   }
 
