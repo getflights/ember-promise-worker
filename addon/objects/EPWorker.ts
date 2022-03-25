@@ -14,9 +14,9 @@ export default class EPWorker {
   }
 
   _onMessage(e: MessageEvent) {
-    // const message = e;
+    const message = e.data;
 
-    const result = this._messageCallback(e)
+    const result = this._messageCallback(message)
     this._postMessage(result)
   }
 

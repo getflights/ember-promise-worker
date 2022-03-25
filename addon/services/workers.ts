@@ -6,11 +6,17 @@ const WORKER_INIT_TIMEOUT = 2000;
 
 type WorkerRegistry = { [path: string]: Worker };
 
+export interface EPWorkerMessage {
+  action: string
+  args: any
+  transferables?: Transferable[]
+}
+
 export default class WorkersService extends Service {
   registry: WorkerRegistry = {};
 
   // Optional: look into Threads.js / comlink / promise-worker / ...
-  workerMessage(workerName: string, message: Object) {
+  workerMessage(workerName: string, message: EPWorkerMessage) {
     return new Promise(async (resolve, reject) => {
       this._getWorker(workerName)
         .then((worker) => {
@@ -37,12 +43,25 @@ export default class WorkersService extends Service {
           }, WORKER_MESSAGE_TIMEOUT)
 
           // Communicate with worker
-          worker.postMessage(message) // We don't need MessageChannel (for now?)
+          // We don't need MessageChannel (for now?)
+          if (message.transferables) {
+            worker.postMessage(message, message.transferables)
+          } else {
+            worker.postMessage(message)
+          }
         })
         .catch(() => {
           reject("Error trying to find the worker.")
         })
     })
+  }
+
+  _isTransferable(object: any) {
+    console.log(object.prototype.toString())
+    switch(object.prototype.toString()) {
+
+    }
+    return false;
   }
 
   async _getWorker(name: string): Promise<Worker> {
