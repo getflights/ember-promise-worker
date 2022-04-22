@@ -1,10 +1,7 @@
 'use strict';
 
 const path = require('path');
-const os = require('os');
 const fs = require('fs');
-
-const esbuild = require('esbuild');
 
 const { WatchedDir } = require('broccoli-source');
 var mergeTrees = require('broccoli-merge-trees');
@@ -14,20 +11,9 @@ const { BuildWorkers } = require('./broccoli-plugins/build-workers');
 module.exports = {
   name: require('./package').name,
 
-  included(app) {
-    this._super.included.apply(this, arguments);
-
-    this.appRoot = path.join(app.project.root);
-    // this.workersDir = path.join(this.appRoot, 'workers');
-  },
-
   treeForPublic() {
-    // !!!
-    // this.parent._packageInfo.realPath
-    // this.parent.root
-    // = "/mnt/gf/ember-gf-components"
-
     const workersDir = path.join(this.parent.root, 'workers');
+    console.log(workersDir)
 
     debugger
 
@@ -46,38 +32,5 @@ module.exports = {
     }
 
     return mergeTrees(trees, { overwrite: true });
-  },
-
-  // _buildWorkers() {
-  //   // 1. detect workers
-  //   let workers = {};
-  //   let dir = fs.readdirSync(this.workersDir);
-  //   dir.forEach((name) => {
-  //     workers[name] = path.join(this.workersDir, name, 'index.ts'); // Also .js in the future?
-  //   });
-
-  //   // 2. setup builder
-  //   const workerBuilder = this._configureWorkerBuilder({
-  //     isProduction: true,
-  //     buildDir: this.workerTempDir,
-  //   });
-
-  //   // 3. build workers
-  //   Object.entries(workers).map(workerBuilder);
-  // },
-
-  // _configureWorkerBuilder({ isProduction, buildDir }) {
-  //   return ([name, entryPath]) => {
-  //     esbuild.buildSync({
-  //       loader: { '.ts': 'ts' },
-  //       entryPoints: [entryPath],
-  //       bundle: true,
-  //       outfile: path.join(buildDir, `${name}.js`), // {buildDir}/workers/{name}.js
-  //       format: 'esm',
-  //       minify: isProduction,
-  //       sourcemap: !isProduction,
-  //       tsconfig: path.join(this.appRoot, 'tsconfig.json'),
-  //     });
-  //   };
-  // },
+  }
 };
