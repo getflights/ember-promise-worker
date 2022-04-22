@@ -18,15 +18,37 @@ module.exports = {
     this._super.included.apply(this, arguments);
 
     this.appRoot = path.join(app.project.root);
-    this.workersDir = path.join(this.appRoot, 'workers');
+    // this.workersDir = path.join(this.appRoot, 'workers');
+  },
+
+  treeForAddon() {
+    // debugger
+
+    // this._packageInfo.addonMainPath
+    // = "/mnt/gf/ember-promise-worker/index.js"
+
+    // this._packageInfo.realPath
+    // = "/mnt/gf/ember-promise-worker"
+
+    // this.parent._packageInfo.realPath
+    // = "/mnt/gf/ember-gf-components"
   },
 
   treeForPublic() {
+    // !!!
+    // this.parent._packageInfo.realPath
+    // this.parent.root
+    // = "/mnt/gf/ember-gf-components"
+
+    const workersDir = path.join(this.parent.root, 'workers');
+
+    debugger
+
     let trees = [];
 
-    if (fs.existsSync(this.workersDir)) {
+    if (fs.existsSync(workersDir)) {
       // 1. Watch workers dir
-      let workerTree = new WatchedDir(this.workersDir);
+      let workerTree = new WatchedDir(workersDir);
 
       // 2. Do something witht his tree > name/index.ts to name.js
       workerTree = new BuildWorkers([workerTree]);
@@ -39,36 +61,36 @@ module.exports = {
     return mergeTrees(trees, { overwrite: true });
   },
 
-  _buildWorkers() {
-    // 1. detect workers
-    let workers = {};
-    let dir = fs.readdirSync(this.workersDir);
-    dir.forEach((name) => {
-      workers[name] = path.join(this.workersDir, name, 'index.ts'); // Also .js in the future?
-    });
+  // _buildWorkers() {
+  //   // 1. detect workers
+  //   let workers = {};
+  //   let dir = fs.readdirSync(this.workersDir);
+  //   dir.forEach((name) => {
+  //     workers[name] = path.join(this.workersDir, name, 'index.ts'); // Also .js in the future?
+  //   });
 
-    // 2. setup builder
-    const workerBuilder = this._configureWorkerBuilder({
-      isProduction: true,
-      buildDir: this.workerTempDir,
-    });
+  //   // 2. setup builder
+  //   const workerBuilder = this._configureWorkerBuilder({
+  //     isProduction: true,
+  //     buildDir: this.workerTempDir,
+  //   });
 
-    // 3. build workers
-    Object.entries(workers).map(workerBuilder);
-  },
+  //   // 3. build workers
+  //   Object.entries(workers).map(workerBuilder);
+  // },
 
-  _configureWorkerBuilder({ isProduction, buildDir }) {
-    return ([name, entryPath]) => {
-      esbuild.buildSync({
-        loader: { '.ts': 'ts' },
-        entryPoints: [entryPath],
-        bundle: true,
-        outfile: path.join(buildDir, `${name}.js`), // {buildDir}/workers/{name}.js
-        format: 'esm',
-        minify: isProduction,
-        sourcemap: !isProduction,
-        tsconfig: path.join(this.appRoot, 'tsconfig.json'),
-      });
-    };
-  },
+  // _configureWorkerBuilder({ isProduction, buildDir }) {
+  //   return ([name, entryPath]) => {
+  //     esbuild.buildSync({
+  //       loader: { '.ts': 'ts' },
+  //       entryPoints: [entryPath],
+  //       bundle: true,
+  //       outfile: path.join(buildDir, `${name}.js`), // {buildDir}/workers/{name}.js
+  //       format: 'esm',
+  //       minify: isProduction,
+  //       sourcemap: !isProduction,
+  //       tsconfig: path.join(this.appRoot, 'tsconfig.json'),
+  //     });
+  //   };
+  // },
 };
