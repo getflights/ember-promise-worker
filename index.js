@@ -13,9 +13,6 @@ module.exports = {
 
   treeForPublic() {
     const workersDir = path.join(this.parent.root, 'workers');
-    console.log(workersDir)
-
-    debugger
 
     let trees = [];
 
