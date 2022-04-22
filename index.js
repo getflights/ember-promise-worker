@@ -21,19 +21,6 @@ module.exports = {
     // this.workersDir = path.join(this.appRoot, 'workers');
   },
 
-  treeForAddon() {
-    // debugger
-
-    // this._packageInfo.addonMainPath
-    // = "/mnt/gf/ember-promise-worker/index.js"
-
-    // this._packageInfo.realPath
-    // = "/mnt/gf/ember-promise-worker"
-
-    // this.parent._packageInfo.realPath
-    // = "/mnt/gf/ember-gf-components"
-  },
-
   treeForPublic() {
     // !!!
     // this.parent._packageInfo.realPath
