@@ -18,7 +18,7 @@ ember install ember-promise-worker
 ## Usage
 With ember-promise-worker, you can use web workers in your Ember project.
 
-Develop your worker in ```<project_root>/workers/{name}/index.ts``` and talk to them in the WorkersService using getWorker('name') and postMessage().
+Develop your worker in ```<project_root>/workers/{name}/index.ts``` and talk to them using the WorkersService.
 
 ### Writing the worker code
 workers/**example**/index.ts
