@@ -29,5 +29,5 @@ module.exports = {
     }
 
     return mergeTrees(trees, { overwrite: true });
-  }
+  },
 };

@@ -1,10 +1,11 @@
 import Service from '@ember/service';
+import { resolveAsset } from 'ember-promise-worker/utils/resolveAsset';
 
-export const WORKERS_PATH = '/workers/'; // --> dist/workers
+const WORKERS_PATH = 'workers/'; // --> dist/workers
 const WORKER_MESSAGE_TIMEOUT = 30000;
 const WORKER_INIT_TIMEOUT = 2000;
 
-type WorkerRegistry = { [path: string]: Worker };
+type WorkerRegistry = { [name: string]: Worker };
 
 export interface EPWorkerMessage {
   action: string
@@ -65,18 +66,20 @@ export default class WorkersService extends Service {
   }
 
   async _getWorker(name: string): Promise<Worker> {
-    return new Promise((resolve, reject) => {
-      const path = WORKERS_PATH + name;
-
+    return new Promise(async (resolve, reject) => {
       // --> If this worker already exists, return the instance
-      if (this.registry[path]) {
-        resolve(this.registry[path]);
+      if (this.registry[name]) {
+        resolve(this.registry[name]);
       }
 
+      const path = WORKERS_PATH + name + '.js';
+
       // 1. Find the worker
-      // @ts-ignore
-      const hash = window.ASSET_FINGERPRINT_HASH;
-      const workerPath = `${path}${hash || ''}.js`
+      // const workerPath = await resolveAsset(path)
+      let workerPath = await resolveAsset(path);
+      if (!workerPath.startsWith('/')) {
+        workerPath = '/' + workerPath
+      }
 
       const worker = new Worker(workerPath);
 
@@ -86,10 +89,10 @@ export default class WorkersService extends Service {
           // console.log(`Worker (${name}) was succesfully registered`)
 
           // Add the worker to the registry
-          this.registry[path] = worker;
+          this.registry[name] = worker;
 
           // Return the worker
-          resolve(this.registry[path]);
+          resolve(this.registry[name]);
         } else {
           reject(`Worker (${name}) did not answer with { registered: true }, is it an EPWorker?`)
         }
@@ -126,16 +129,9 @@ export default class WorkersService extends Service {
     })
   }
 
-  // terminateWorker(worker: Worker) {
-  //   worker.terminate();
-  //   const path = worker
-  //   delete this.registry[worker]
-  // }
-
   terminateWorkerByName(name: string) {
-    const path = WORKERS_PATH + name;
-    this.registry[path].terminate();
-    delete this.registry[path];
+    this.registry[name].terminate();
+    delete this.registry[name];
   }
 
   willDestroy() {
