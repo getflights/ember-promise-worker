@@ -40,7 +40,7 @@ async function _fetchAssetMap(): Promise<AssetMap> {
       // if (DEBUG) {
       //   throw new Error('Asset map not found');
       // }
-      assetMap.enabled = false;
+      return {enabled: false};
     });
   // } else {
   //   assetMap.enabled = false;
