@@ -68,7 +68,7 @@
     "@types/qunit": "^2.11.3",
     "@types/rsvp": "^4.0.4",
     "babel-eslint": "^10.1.0",
-    "broccoli-asset-rev": "^3.0.0",
+    "broccoli-asset-rev": "ember-cli/broccoli-asset-rev#pull/130/head",
     "ember-cli": "~3.28.5",
     "ember-cli-dependency-checker": "^3.2.0",
     "ember-cli-inject-live-reload": "^2.1.0",
