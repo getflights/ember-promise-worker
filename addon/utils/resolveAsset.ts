@@ -1,5 +1,3 @@
-import DEBUG from '@glimmer/env';
-
 interface AssetMap {
   loaded: boolean;
   assets: {
