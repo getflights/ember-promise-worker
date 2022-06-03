@@ -61,9 +61,10 @@ export const resolveAsset = async (path: string) => {
   path = path.replace(/^\//g, ''); // remove leading '/' just in case
 
   if (!assetMap.assets![path]) {
-    if (DEBUG) {
-      throw new Error(`Asset '${path}' was not found in the asset map.`);
-    }
+    // if (DEBUG) {
+    //   throw new Error(`Asset '${path}' was not found in the asset map.`);
+    // }
+    return undefined;
   }
 
   return assetMap.assets![path];

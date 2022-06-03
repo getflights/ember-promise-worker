@@ -26,7 +26,7 @@ export default class WorkersService extends Service {
           // Listen to 'message' responses from the worker, then resolve
           const messageFromWorker = (e: MessageEvent) => {
             if (e.data.error) {
-              reject(e.data.error)
+              reject(e.data.error);
             }
             resolve(e.data);
             // Stop listening to the worker, it has been resolved
@@ -42,7 +42,10 @@ export default class WorkersService extends Service {
 
           // Communicate with worker
           if (message.transferables) {
-            worker.postMessage(message, [messageChannel.port2, ...message.transferables]);
+            worker.postMessage(message, [
+              messageChannel.port2,
+              ...message.transferables,
+            ]);
           } else {
             worker.postMessage(message, [messageChannel.port2]);
           }
@@ -72,6 +75,12 @@ export default class WorkersService extends Service {
       // 1. Find the worker
       // const workerPath = await resolveAsset(path)
       let workerPath = await resolveAsset(path);
+
+      if (!workerPath) {
+        reject('Worker path could not be resolved.');
+        return;
+      }
+
       if (!workerPath.startsWith('/')) {
         workerPath = '/' + workerPath;
       }

@@ -24,7 +24,7 @@ module('Unit | Service | workers', function (hooks) {
     assert.ok(testMsg === workerMsg, 'testworker returns your message');
   });
 
-  skip("workers service doesn't find non existing one", async function (assert) {
+  test("workers service doesn't find non existing one", async function (assert) {
     let workers: WorkersService = this.owner.lookup(
       'service:workers'
     ) as WorkersService;
