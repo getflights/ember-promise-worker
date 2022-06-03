@@ -1,4 +1,4 @@
-import { module, test } from 'qunit';
+import { module, skip, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import WorkersService from 'ember-promise-worker/services/workers';
 
@@ -24,7 +24,7 @@ module('Unit | Service | workers', function (hooks) {
     assert.ok(testMsg === workerMsg, 'testworker returns your message');
   });
 
-  test("workers service doesn't find non existing one", async function (assert) {
+  skip("workers service doesn't find non existing one", async function (assert) {
     let workers: WorkersService = this.owner.lookup(
       'service:workers'
     ) as WorkersService;
@@ -55,5 +55,27 @@ module('Unit | Service | workers', function (hooks) {
       });
 
     assert.ok(hasMessageErrors, 'workerMessage throws an error');
+  });
+
+  test("worker answers to the correct source (hash)", async function (assert) {
+    let workers: WorkersService = this.owner.lookup(
+      'service:workers'
+    ) as WorkersService;
+    assert.ok(workers, 'workers service was found');
+
+    const workerMessage1 = await workers.workerMessage(
+      'testworker',
+      // @ts-ignore
+      'a'
+    );
+
+    const workerMessage2 = await workers.workerMessage(
+      'testworker',
+      // @ts-ignore
+      'b'
+    );
+
+    console.log(workerMessage1)
+    console.log(workerMessage2)
   });
 });

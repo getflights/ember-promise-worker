@@ -8,9 +8,9 @@ const WORKER_INIT_TIMEOUT = 2000;
 type WorkerRegistry = { [name: string]: Worker };
 
 export interface EPWorkerMessage {
-  action: string
-  args: any
-  transferables?: Transferable[]
+  action: string;
+  args: any;
+  transferables?: Transferable[];
 }
 
 export default class WorkersService extends Service {
@@ -21,46 +21,41 @@ export default class WorkersService extends Service {
     return new Promise(async (resolve, reject) => {
       this._getWorker(workerName)
         .then((worker) => {
+          const messageChannel = new MessageChannel();
+
           // Listen to 'message' responses from the worker, then resolve
           const messageFromWorker = (e: MessageEvent) => {
-            resolve(e.data)
+            if (e.data.error) {
+              reject(e.data.error)
+            }
+            resolve(e.data);
             // Stop listening to the worker, it has been resolved
-            worker.removeEventListener('message', messageFromWorker)
-          }
+            worker.removeEventListener('message', messageFromWorker);
+          };
 
-          worker.addEventListener('message', messageFromWorker)
-
-          // Listen to 'error' responses from the worker, and reject
-          const errorFromWorker = (e: ErrorEvent) => {
-            e.preventDefault()
-            reject(e)
-          }
-
-          worker.addEventListener('error', errorFromWorker)
+          messageChannel.port1.onmessage = messageFromWorker;
 
           // Don't freeze, add a timeout?
           setTimeout(() => {
-            reject(`Worker (${workerName}) took to long to respond.`)
-          }, WORKER_MESSAGE_TIMEOUT)
+            reject(`Worker (${workerName}) took to long to respond.`);
+          }, WORKER_MESSAGE_TIMEOUT);
 
           // Communicate with worker
-          // We don't need MessageChannel (for now?)
           if (message.transferables) {
-            worker.postMessage(message, message.transferables)
+            worker.postMessage(message, [messageChannel.port2, ...message.transferables]);
           } else {
-            worker.postMessage(message)
+            worker.postMessage(message, [messageChannel.port2]);
           }
         })
         .catch(() => {
-          reject("Error trying to find the worker.")
-        })
-    })
+          reject('Error trying to find the worker.');
+        });
+    });
   }
 
   _isTransferable(object: any) {
-    console.log(object.prototype.toString())
-    switch(object.prototype.toString()) {
-
+    console.log(object.prototype.toString());
+    switch (object.prototype.toString()) {
     }
     return false;
   }
@@ -78,7 +73,7 @@ export default class WorkersService extends Service {
       // const workerPath = await resolveAsset(path)
       let workerPath = await resolveAsset(path);
       if (!workerPath.startsWith('/')) {
-        workerPath = '/' + workerPath
+        workerPath = '/' + workerPath;
       }
 
       const worker = new Worker(workerPath);
@@ -94,39 +89,41 @@ export default class WorkersService extends Service {
           // Return the worker
           resolve(this.registry[name]);
         } else {
-          reject(`Worker (${name}) did not answer with { registered: true }, is it an EPWorker?`)
+          reject(
+            `Worker (${name}) did not answer with { registered: true }, is it an EPWorker?`
+          );
         }
 
         // Stop listening to the worker, the promise was handled
-        removeWorkerListeners()
-      }
+        removeWorkerListeners();
+      };
 
       // Listen to worker messages
-      function workerListener (e: MessageEvent) {
-        workerRegistered(e)
+      function workerListener(e: MessageEvent) {
+        workerRegistered(e);
       }
 
-      worker.addEventListener('message', workerListener)
+      worker.addEventListener('message', workerListener);
 
       // Listen to worker errors
       function workerErrorListener() {
-        reject(`Worker (${name}) could not be initialized.`)
+        reject(`Worker (${name}) could not be initialized.`);
         // Stop listening to the worker, the promise was handled
-        removeWorkerListeners()
+        removeWorkerListeners();
       }
 
-      worker.addEventListener('error', workerErrorListener)
+      worker.addEventListener('error', workerErrorListener);
 
       // Function to help w removing listeners
       function removeWorkerListeners() {
-        worker.removeEventListener('message', workerListener)
-        worker.removeEventListener('error', workerErrorListener)
+        worker.removeEventListener('message', workerListener);
+        worker.removeEventListener('error', workerErrorListener);
       }
 
       setTimeout(() => {
-        reject(`Worker (${name}) took to long to respond. Is it an EPWorker?`)
-      }, WORKER_INIT_TIMEOUT)
-    })
+        reject(`Worker (${name}) took to long to respond. Is it an EPWorker?`);
+      }, WORKER_INIT_TIMEOUT);
+    });
   }
 
   terminateWorkerByName(name: string) {

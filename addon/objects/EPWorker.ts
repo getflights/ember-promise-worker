@@ -10,18 +10,18 @@ export default class EPWorker {
     addEventListener('message', this._onMessage)
 
     // Send a message that you are alive
-    this._postMessage({registered: true})
+    postMessage({registered: true})
   }
 
   async _onMessage(e: MessageEvent) {
+    const port = e.ports[0];
     const message = e.data;
 
-    const result = await this._messageCallback(message)
-    this._postMessage(result)
-  }
+    const result = await this._messageCallback(message).catch((e) => {
+      port.postMessage({error: e})
+    })
 
-  _postMessage(message: any) {
-    postMessage(message)
+    port.postMessage(result)
   }
 
   register(cb: MessageCallback) {
