@@ -4,6 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const esbuild = require('esbuild');
 
+const addonRootFolder = path.join(__dirname, '..');
+
 class BuildWorkers extends Plugin {
   constructor(inputNodes, options = {}) {
     super(inputNodes, {
@@ -46,6 +48,7 @@ class BuildWorkers extends Plugin {
         format: 'esm',
         minify: isProduction,
         sourcemap: !isProduction,
+        tsconfig: path.join(addonRootFolder, 'tsconfig.json')
       });
     };
   }
