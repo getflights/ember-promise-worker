@@ -5,7 +5,7 @@ const fs = require('fs');
 
 const { WatchedDir } = require('broccoli-source');
 var mergeTrees = require('broccoli-merge-trees');
-const { Funnel } = require('broccoli-funnel');
+const Funnel = require('broccoli-funnel');
 const { BuildWorkers } = require('./broccoli-plugins/build-workers');
 
 module.exports = {
