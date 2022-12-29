@@ -1,6 +1,6 @@
 {
   "name": "ember-promise-worker",
-  "version": "1.3.4",
+  "version": "2.0.0-beta.1",
   "description": "An addon to work with Web workers in Ember using promises.",
   "keywords": [
     "ember-addon"
